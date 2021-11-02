@@ -1,1 +1,1 @@
-RESOURCES_PATH = './resources/DonneesSonar'
+RESOURCES_PATH = '../resources/dataset-1/'
