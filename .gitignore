@@ -1,2 +1,7 @@
 __pycache__/*
+
 output/*.jpg
+output/*.png
+output/*.tiff
+output/*.mp3
+output/*.wav
