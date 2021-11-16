@@ -49,97 +49,6 @@ data_1 = data[:, 1]
 
 
 
-
-### ADD SECONDS TICKMARKS
-
-
-def sliding_rfft (signal: np.ndarray, sample_rate: int, folder: str = 'sliding_rfft/', window_width: int = 100, step: int = 1):
-
-    figsize = (15, 10)
-    vidsize = (figsize[0]*100, figsize[1]*100)
-    fps = 10 #15
-
-    savedir = OUTPUT_PATH + folder
-    if os.path.exists(savedir): shutil.rmtree(savedir)
-    os.makedirs(savedir)
-    signal_width = signal.shape[0]
-
-    # Initialise video
-    # rfft_video_path = f'{savedir}rfft-video.avi'
-    # rfft_video = cv2.VideoWriter(rfft_video_path,cv2.VideoWriter_fourcc(*'DIVX'), fps, vidsize)
-    # signal_video_path = f'{savedir}signal-video.avi'
-    # signal_video = cv2.VideoWriter(signal_video_path,cv2.VideoWriter_fourcc(*'DIVX'), fps, vidsize)
-    # stack_video_path = f'{savedir}stack-video.mp4'
-    # fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    # #cv2.VideoWriter_fourcc(*'DIVX')
-    # stack_video = cv2.VideoWriter(stack_video_path, fourcc, fps, vidsize)
-
-
-    window_position = 0
-    position_id = 0
-    while window_position < signal_width - window_width:
-
-        # Print progress
-        progress = round(window_position / signal_width * 100, 1)
-        print(f'Progress (window position): {window_position} / {signal_width} ({progress}%)')
-
-        # Generate signal window
-        signal_window = signal[window_position: window_position+window_width]
-
-        # Compute rfft
-        yf = rfft(signal_window)
-        xf = rfftfreq(signal_window.shape[0], 1 / sample_rate)
-
-        print(yf.shape)
-
-        # Save rfft
-        plt.figure(figsize=figsize)
-        plt.ylim((0, 10000000))
-        plt.plot(xf, np.abs(yf))
-        rfft_path = f'{savedir}rfft-{position_id}.png'
-        plt.savefig (rfft_path)
-        # plt.clf()
-        plt.close()
-
-        # Save signal
-        plt.figure(figsize=figsize)
-        plt.ylim((-10000, 10000))
-        plt.plot(np.arange(window_position, window_position + window_width), signal_window)
-        signal_path = f'{savedir}signal-{position_id}.png'
-        plt.savefig(signal_path) # bbox_inches='tight'
-        # plt.clf()
-        plt.close()
-
-        # Save stack
-        rfft_image = cv2.imread(rfft_path)
-        signal_image = cv2.imread(signal_path)
-        stack_image = np.column_stack ((rfft_image, signal_image))
-        stack_path = f'{savedir}stack-{position_id}.png'
-        cv2.imwrite(stack_path, stack_image)
-
-        cv2.destroyAllWindows()
-        window_position += step
-        position_id += 1
-
-    
-    # stack_video = cv2.VideoWriter(stack_video_path, 0, fps, vidsize)
-    # for img in frame_list:
-    #     stack_video.write(img)
-    # cv2.destroyAllWindows()
-    # stack_video.release()
-
-    stack_video_path = f'{savedir}stack-video.mp4'
-    os.system('cd  /Users/anatole/Documents/Data Sophia/data2021-bruits-mer')
-    os.system(f'ffmpeg -r {fps} -i {savedir}stack-%01d.png -vcodec mpeg4 -y {stack_video_path}')
-
-
-
-
-
-
-
-from typing import Callable
-
 class VideoGraph:
 
     def __init__ (self, signal: np.ndarray, sample_rate: int, window_width: int = 100, window_step: int = 1):
@@ -162,6 +71,8 @@ class VideoGraph:
 
 
     def __plot_signal (self, plot_id: str = 'signal'):
+        print('Plotting signal')
+
         self.__plots  [plot_id] = list()
         self.__minmax [plot_id] = list((0., 0.))
         self.__labels [plot_id] = ('Time [sec]', 'Amplitude')
@@ -186,6 +97,8 @@ class VideoGraph:
 
 
     def plot_rfft (self, plot_id: str = 'rfft'):
+        print('Plotting RFFT')
+
         self.__plots  [plot_id] = list()
         self.__minmax [plot_id] = list((0., 0.))
         self.__labels [plot_id] = ('Frequency [Hz]', 'Amplitude')
@@ -282,7 +195,7 @@ class VideoGraph:
 
 
 window_width = int(1e6)
-window_step  = int(1e6)#int(1e5)
+window_step  = int(1e5)
 
 # sliding_rfft (
 #     signal=data_0,
@@ -301,5 +214,3 @@ video_graph = VideoGraph (
 
 video_graph.plot_rfft()
 video_graph.save(plots=['rfft', 'signal'])
-
-
