@@ -1,10 +1,12 @@
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.lib.function_base import select
+
 import scipy
 from scipy.io import wavfile
 from scipy.signal import cwt, ricker, spectrogram
 from scipy.fft import rfft, rfftfreq
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 import cv2
 
@@ -135,81 +137,137 @@ def sliding_rfft (signal: np.ndarray, sample_rate: int, folder: str = 'sliding_r
 
 
 
-
+from typing import Callable
 
 class VideoGraph:
 
-    def __init__ (self, plots: dict, minmax: dict):
-        self.__plots = plots
-        self.__minmax = minmax
+    def __init__ (self, signal: np.ndarray, sample_rate: int, window_width: int = 100, window_step: int = 1):
+        self.signal = signal
+        self.signal_length = signal.shape[0]
+        self.sample_rate = sample_rate
 
-    @classmethod
-    def sliding_rfft (cls, signal: np.ndarray, sample_rate: int, window_width: int = 100, step: int = 1):
-        plots = {'signal': list(), 'rfft': list()}
-        minmax = {'signal': [None, None], 'rfft': [None, None]}
+        self.window_width = window_width
+        self.window_step = window_step
+        self.window_nb = math.floor((self.signal_length - window_width) / window_step) + 1
 
-        signal_length = signal.shape[0]
-        window_position = 0
-        while window_position < signal_length - window_width:
+        self.__plots = dict()
+        self.__minmax = dict()
+        self.__labels = dict()
+
+        self.__plot_signal(plot_id='signal')
+
+
+    def __plot_signal (self, plot_id: str = 'signal'):
+        self.__plots  [plot_id] = list()
+        self.__minmax [plot_id] = list((0., 0.))
+        self.__labels [plot_id] = ('Time [sec]', 'Amplitude')
+        
+        for pos_id in range (self.window_nb):
+            window_start = pos_id * self.window_step
+            window_stop = window_start + self.window_width
 
             # Print progress
-            progress = round(window_position / signal_length * 100, 1)
-            print(f'Progress (window position): {window_position} / {signal_length} ({progress}%)')
+            progress = round(pos_id / self.window_nb * 100, 1)
+            print(f'Progress: {pos_id} / {self.window_nb} ({progress}%)')
 
             # Generate signal window
-            sample_ids = np.arange(window_position, window_position + window_width)
-            signal_window = signal[window_position: window_position+window_width]
+            sample_ids = np.arange(window_start, window_stop)
+            signal_window = self.signal[window_start : window_stop]
 
-            # Save signal window & minmax
-            plots['signal'] .append( (sample_ids, signal_window) )
+            self.__plots[plot_id] .append( (sample_ids, signal_window) )
             signal_min = min(signal_window)
             signal_max = max(signal_window)
-            if signal_min < minmax['signal'][0]: minmax['signal'][0] = signal_min
-            if signal_max > minmax['signal'][1]: minmax['signal'][1] = signal_max
+            if signal_min < self.__minmax[plot_id][0]: self.__minmax[plot_id][0] = signal_min
+            if signal_max > self.__minmax[plot_id][1]: self.__minmax[plot_id][1] = signal_max
+
+
+    def plot_rfft (self, plot_id: str = 'rfft'):
+        self.__plots  [plot_id] = list()
+        self.__minmax [plot_id] = list((0., 0.))
+        self.__labels [plot_id] = ('Frequency [Hz]', 'Amplitude')
+
+        for pos_id in range (self.window_nb):
+
+            # Print progress
+            progress = round(pos_id / self.window_nb * 100, 1)
+            print(f'Progress: {pos_id} / {self.window_nb} ({progress}%)')
+
+            # Get window
+            signal_window = self.__plots['signal'][pos_id]
 
             # Compute rfft
-            xf = rfftfreq(signal_window.shape[0], 1 / sample_rate)
+            xf = rfftfreq(self.window_width, 1 / sample_rate)
             yf = abs( rfft(signal_window) )
 
             # Save rfft & minmax
-            plots['rfft'] .append( (xf, yf) )
+            self.__plots[plot_id] .append( (xf, yf) )
             rfft_min = min(yf)
             rfft_max = max(yf)
-            if rfft_min < minmax['rfft'][0]: minmax['rfft'][0] = rfft_min
-            if rfft_max > minmax['rfft'][1]: minmax['rfft'][1] = rfft_max
-
-            # Move window
-            window_position += step
-
-        return VideoGraph(plots=plots, minmax=minmax)
+            if rfft_min < self.__minmax[plot_id][0]: self.__minmax[plot_id][0] = rfft_min
+            if rfft_max > self.__minmax[plot_id][1]: self.__minmax[plot_id][1] = rfft_max
 
 
-    def save (self, dirpath: str, plots='all'):
-        # Select plots (TODO)
-        if plots == 'all': pass
+    def save (self, folder = None, plots = 'all'):
 
-        for position_id in range (10):
-            pass
+        figsize = (15, 10)
+        fps = 10
 
+        # Select plots
+        selected_ids = list()
+        if plots == 'all':
+            selected_ids = list(self.__plots.keys())
+        elif type(plots) == str:
+            selected_ids = [self.__plots[plots], ]
+        elif type(plots) == list:
+            for key in plots:
+                if key in self.__plot.keys(): selected_ids.append(key)
+        else: return
 
-    def save_imgs (self):
-        pass
+        # Create folder
+        if not folder:
+            folder = f'sliding-graph_width={self.window_width}-step={self.step}-ids={"_".join(selected_ids)}'
+        
+        savedir = os.path.join(OUTPUT_PATH, folder)
+        if os.path.exists(savedir): shutil.rmtree(savedir)
+        os.makedirs(savedir)
 
+        for pos_id in range (self.window_nb):
+            for plot_id in selected_ids:
+                x, y = self.__plots [plot_id] [pos_id]
 
+                # Plot image
+                plt.figure(figsize=figsize)
+                plt.ylim((self.__minmax[plot_id][0], self.__minmax[plot_id][1]))
+                plt.plot(x, y)
 
+                plt.xlabel(self.__labels[plot_id][0])
+                plt.ylabel(self.__labels[plot_id][1])
 
+                # Save image
+                path = os.path.join(savedir, f'{plot_id}-{pos_id}.png')
+                plt.savefig(path)
+                plt.close()
 
-# RUN
-# window_width = 100000
-# step = 10000
+            ### CREATE STACK
+
+        os.system('cd  /Users/anatole/Documents/Data Sophia/data2021-bruits-mer')
+        for plot_id in selected_ids:
+            path = os.path.join(savedir, f'{plot_id}.mp4')
+            image_path = os.path.join(savedir, f'{plot_id}-%01d.png')
+            os.system(f'ffmpeg -r {fps} -i {image_path} -vcodec mpeg4 -y {path}')
+        
+        ### SAVE STACK VIDEO
+
 
 window_width = int(1e6)
-step = int(25e3)
+window_step  = int(1e5)
 
-sliding_rfft (
-    signal = data_0,
+video_graph = VideoGraph (
+    signal=data_0,
     sample_rate=sample_rate,
-    folder=f'silding_rfft-data_0-width_{window_width}-step_{step}/',
     window_width=window_width,
-    step=step
+    window_step=window_step
 )
+
+video_graph.plot_rfft()
+video_graph.save()
