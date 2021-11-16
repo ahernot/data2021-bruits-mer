@@ -184,7 +184,10 @@ class VideoGraph:
         return VideoGraph(plots=plots, minmax=minmax)
 
 
-    def save (self, dirpath: str):
+    def save (self, dirpath: str, plots='all'):
+        # Select plots (TODO)
+        if plots == 'all': pass
+
         for position_id in range (10):
             pass
 
