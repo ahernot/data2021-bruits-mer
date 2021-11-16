@@ -35,7 +35,6 @@ def plot_spectrogram (spectrogram: tuple, filename: str = 'spectrogram'):
 # Read file
 filepath = RESOURCES_PATH + 'samples/2020_01_28_3A/2020_01_28_1.wav'  # use OS path objects
 sample_rate, data = wavfile.read(filepath)
-print(sample_rate)
 
 # Separate channels
 data_0 = data[:, 0]
@@ -90,6 +89,8 @@ def sliding_rfft (signal: np.ndarray, sample_rate: int, folder: str = 'sliding_r
         # Compute rfft
         yf = rfft(signal_window)
         xf = rfftfreq(signal_window.shape[0], 1 / sample_rate)
+
+        print(yf.shape)
 
         # Save rfft
         plt.figure(figsize=figsize)
@@ -156,6 +157,9 @@ class VideoGraph:
 
         self.__plot_signal(plot_id='signal')
 
+    def plot_names (self):
+        return list(self.__plots.keys())
+
 
     def __plot_signal (self, plot_id: str = 'signal'):
         self.__plots  [plot_id] = list()
@@ -193,11 +197,11 @@ class VideoGraph:
             print(f'Progress: {pos_id} / {self.window_nb} ({progress}%)')
 
             # Get window
-            signal_window = self.__plots['signal'][pos_id]
+            signal_window = self.__plots['signal'][pos_id][1]
 
             # Compute rfft
             xf = rfftfreq(self.window_width, 1 / sample_rate)
-            yf = abs( rfft(signal_window) )
+            yf = np.abs( rfft(signal_window) )
 
             # Save rfft & minmax
             self.__plots[plot_id] .append( (xf, yf) )
@@ -208,6 +212,9 @@ class VideoGraph:
 
 
     def save (self, folder = None, plots = 'all'):
+        # Specify plots to get a specific order
+
+        print('Saving')
 
         figsize = (15, 10)
         fps = 10
@@ -219,19 +226,21 @@ class VideoGraph:
         elif type(plots) == str:
             selected_ids = [self.__plots[plots], ]
         elif type(plots) == list:
-            for key in plots:
-                if key in self.__plot.keys(): selected_ids.append(key)
+            for key in plots:  # Retain order
+                if key in self.__plots.keys(): selected_ids.append(key)
         else: return
 
         # Create folder
         if not folder:
-            folder = f'sliding-graph_width={self.window_width}-step={self.step}-ids={"_".join(selected_ids)}'
+            folder = f'sliding-graph_width={self.window_width}-step={self.window_step}-ids={"_".join(selected_ids)}'
         
         savedir = os.path.join(OUTPUT_PATH, folder)
         if os.path.exists(savedir): shutil.rmtree(savedir)
         os.makedirs(savedir)
 
         for pos_id in range (self.window_nb):
+
+            stack_images = list()
             for plot_id in selected_ids:
                 x, y = self.__plots [plot_id] [pos_id]
 
@@ -248,19 +257,40 @@ class VideoGraph:
                 plt.savefig(path)
                 plt.close()
 
-            ### CREATE STACK
+                # Read image
+                image = cv2.imread(path)
+                stack_images.append(image)
+
+            # Save stack image
+            stack_image = np.column_stack (stack_images)
+            stack_path = os.path.join(savedir, f'stack-{pos_id}.png')
+            cv2.imwrite(stack_path, stack_image)
 
         os.system('cd  /Users/anatole/Documents/Data Sophia/data2021-bruits-mer')
+
+        # Save plot videos
         for plot_id in selected_ids:
             path = os.path.join(savedir, f'{plot_id}.mp4')
             image_path = os.path.join(savedir, f'{plot_id}-%01d.png')
             os.system(f'ffmpeg -r {fps} -i {image_path} -vcodec mpeg4 -y {path}')
         
-        ### SAVE STACK VIDEO
+        # Save stack video
+        path = os.path.join(savedir, f'stack.mp4')
+        stack_path = os.path.join(savedir, 'stack-%01d.png')
+        os.system(f'ffmpeg -r {fps} -i {stack_path} -vcodec mpeg4 -y {path}')
+
 
 
 window_width = int(1e6)
-window_step  = int(1e5)
+window_step  = int(1e6)#int(1e5)
+
+# sliding_rfft (
+#     signal=data_0,
+#     sample_rate=sample_rate,
+#     folder='sliding_rfft/',
+#     window_width=window_width,
+#     step=window_step
+# )
 
 video_graph = VideoGraph (
     signal=data_0,
@@ -270,4 +300,6 @@ video_graph = VideoGraph (
 )
 
 video_graph.plot_rfft()
-video_graph.save()
+video_graph.save(plots=['rfft', 'signal'])
+
+
