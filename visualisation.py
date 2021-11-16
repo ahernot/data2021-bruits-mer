@@ -1,5 +1,6 @@
 import os
 import subprocess
+from types import TracebackType
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,15 +20,19 @@ from preferences import *
 filepath = RESOURCES_PATH + 'samples/2020_01_28_3A/2020_01_28_1.wav'  # use OS path objects
 sample_rate, data = wavfile.read(filepath)
 
+print(sample_rate)
+
 
 # Plot part of the signal
-RUN_1 = False
+RUN_1 = True
 if RUN_1 == True:
     sample = data[:10000, :]
     xcoords = np.arange(sample.shape[0])
+    # xcoords = np.arange(data.shape[0])
 
     plt.figure(figsize=(15, 10))
     plt.plot(xcoords, sample[:, :])
+    plt.plot(xcoords, data[:, 0])
     plt.show()
 
 
@@ -57,15 +62,15 @@ if RUN_3 == True:
 # Real Fourier transform
 RUN_4 = True
 if RUN_4 == True:
-    N = data.shape[0]  # Number of samples
+    N = sample.shape[0]  # Number of samples
 
     # Note the extra 'r' at the front
-    yf = rfft(data[:, 0])
+    yf = rfft(sample[:, 0])
     xf = rfftfreq(N, 1 / sample_rate)
 
-    # plt.figure(figsize=(15, 10))
-    # plt.plot(xf, np.abs(yf))
-    # plt.show()
+    plt.figure(figsize=(15, 10))
+    plt.plot(xf, np.abs(yf))
+    plt.show()
 
     # todo: compute maxima
 
@@ -79,8 +84,8 @@ if RUN_4 == True:
     target_idx = int(points_per_freq * target_freq)
 
     yf_filtered = np.copy(yf)
-    yf_filtered[:target_idx - 4000] = 0
-    yf_filtered[target_idx + 50000:] = 0
+    yf_filtered[:target_idx - 5000] = 0
+    yf_filtered[target_idx + 5000:] = 0
 
     plt.figure(figsize=(15, 10))
     plt.plot(xf, np.abs(yf_filtered))
