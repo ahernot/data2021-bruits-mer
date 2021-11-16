@@ -96,7 +96,7 @@ class VideoGraph:
             if signal_max > self.__minmax[plot_id][1]: self.__minmax[plot_id][1] = signal_max
 
 
-    def plot_rfft (self, plot_id: str = 'rfft'):
+    def plot_rfft (self, plot_id: str = 'rfft', freq_cutoff_min = 0, freq_cutoff_max = float('inf')):
         print('Plotting RFFT')
 
         self.__plots  [plot_id] = list()
@@ -115,6 +115,7 @@ class VideoGraph:
             # Compute rfft
             xf = rfftfreq(self.window_width, 1 / sample_rate)
             yf = np.abs( rfft(signal_window) )
+            yf = yf * (xf > freq_cutoff_min) * (xf < freq_cutoff_max)  # apply cutoff
 
             # Save rfft & minmax
             self.__plots[plot_id] .append( (xf, yf) )
@@ -127,7 +128,7 @@ class VideoGraph:
     def save (self, folder = None, plots = 'all'):
         # Specify plots to get a specific order
 
-        print('Saving')
+        print('Saving frames')
 
         figsize = (15, 10)
         fps = 10
@@ -152,6 +153,10 @@ class VideoGraph:
         os.makedirs(savedir)
 
         for pos_id in range (self.window_nb):
+
+            # Print progress
+            progress = round(pos_id / self.window_nb * 100, 1)
+            print(f'Progress: {pos_id} / {self.window_nb} ({progress}%)')
 
             stack_images = list()
             for plot_id in selected_ids:
@@ -181,6 +186,8 @@ class VideoGraph:
 
         os.system('cd  /Users/anatole/Documents/Data Sophia/data2021-bruits-mer')
 
+        print('Saving videos')
+
         # Save plot videos
         for plot_id in selected_ids:
             path = os.path.join(savedir, f'{plot_id}.mp4')
@@ -194,23 +201,28 @@ class VideoGraph:
 
 
 
-window_width = int(1e6)
-window_step  = int(1e5)
+# window_width = int(1e6)
+# window_step  = int(1e4) # int(1e5)
 
-# sliding_rfft (
+# video_graph = VideoGraph (
 #     signal=data_0,
 #     sample_rate=sample_rate,
-#     folder='sliding_rfft/',
 #     window_width=window_width,
-#     step=window_step
+#     window_step=window_step
 # )
 
-video_graph = VideoGraph (
-    signal=data_0,
-    sample_rate=sample_rate,
-    window_width=window_width,
-    window_step=window_step
-)
+# video_graph.plot_rfft()
+# video_graph.save(plots=['rfft', 'signal'])
 
-video_graph.plot_rfft()
-video_graph.save(plots=['rfft', 'signal'])
+
+# issue: min and max of signal are not the right ones
+
+
+sig = data_0
+xf = rfftfreq(data_0.shape[0], 1 / sample_rate)
+yf = np.abs( rfft(data_0) )
+
+freq_cutoff_min = 1.50037510e-02 # 0
+freq_cutoff_max = 4.79999700e+04  #float("inf")
+print(yf * (xf > freq_cutoff_min) * (xf < freq_cutoff_max))
+
