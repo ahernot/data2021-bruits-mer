@@ -51,7 +51,7 @@ data_1 = data[:, 1]
 
 class VideoGraph:
 
-    def __init__ (self, signal: np.ndarray, sample_rate: int, window_width: int = 100, window_step: int = 1):
+    def __init__ (self, signal:np.ndarray, sample_rate:int, window_width:int=100, window_step:int=1):
         self.signal = signal
         self.signal_length = signal.shape[0]
         self.sample_rate = sample_rate
@@ -63,19 +63,34 @@ class VideoGraph:
         self.__plots = dict()
         self.__minmax = dict()
         self.__labels = dict()
+        self.__ticks = dict()
 
-        self.__plot_signal(plot_id='signal')
+    def __repr__ (self):
+        desc_list = [
+            'VideoGraph object',
+            f' Signal length (samples): {self.signal_length}',
+            f' Sampling rate (Hz):      {self.sample_rate}',
+            '',
+            f' Window width (samples):  {self.window_width}',
+            f' Window width (seconds):  {round(self.window_width / self.sample_rate, 3)}',
+            f' Window step  (samples):  {self.window_step}',
+            f' Window number:           {self.window_nb}',
+            '',
+            f' Plots:                   {self.plot_names()}',
+        ]
+        return '\n'.join(desc_list)
 
     def plot_names (self):
         return list(self.__plots.keys())
 
 
-    def __plot_signal (self, plot_id: str = 'signal'):
+    def plot_signal (self, plot_id:str='signal', fix_scale_y=True):
         print('Plotting signal')
 
         self.__plots  [plot_id] = list()
-        self.__minmax [plot_id] = list((0., 0.))
+        self.__minmax [plot_id] = {'x': list((None, None)), 'y': list((None, None))}
         self.__labels [plot_id] = ('Time [sec]', 'Amplitude')
+        self.__ticks  [plot_id] = {'x': list(range(0, self.signal_length, 50000)), 'y': None}
         
         for pos_id in range (self.window_nb):
             window_start = pos_id * self.window_step
@@ -89,19 +104,29 @@ class VideoGraph:
             sample_ids = np.arange(window_start, window_stop)
             signal_window = self.signal[window_start : window_stop]
 
+            # Save signal window
             self.__plots[plot_id] .append( (sample_ids, signal_window) )
-            signal_min = min(signal_window)
-            signal_max = max(signal_window)
-            if signal_min < self.__minmax[plot_id][0]: self.__minmax[plot_id][0] = signal_min
-            if signal_max > self.__minmax[plot_id][1]: self.__minmax[plot_id][1] = signal_max
+
+            # Save minmax
+            if fix_scale_y:
+                signal_min = min(signal_window)
+                signal_max = max(signal_window)
+                if signal_min < self.__minmax[plot_id]['y'][0]: self.__minmax[plot_id]['y'][0] = signal_min
+                if signal_max > self.__minmax[plot_id]['y'][1]: self.__minmax[plot_id]['y'][1] = signal_max
+        if not fix_scale_y: self.__minmax[plot_id]['y'] = list((None, None))
 
 
-    def plot_rfft (self, plot_id: str = 'rfft', freq_cutoff_min = 0, freq_cutoff_max = float('inf')):
+    def plot_rfft (self, plot_id:str='rfft', fix_scale_x=True, fix_scale_y=True, freq_cutoff_min=0, freq_cutoff_max=float('inf'), amplitude_threshold=float('-inf')):
+        
+        # Plot signal
+        if 'signal' not in self.plot_names(): self.plot_signal(plot_id='signal')
+
         print('Plotting RFFT')
 
         self.__plots  [plot_id] = list()
-        self.__minmax [plot_id] = list((0., 0.))
+        self.__minmax [plot_id] = {'x': list((freq_cutoff_min, freq_cutoff_max)), 'y': list((None, None))}
         self.__labels [plot_id] = ('Frequency [Hz]', 'Amplitude')
+        self.__ticks  [plot_id] = {'x': list(range(freq_cutoff_min, freq_cutoff_max, 2500)), 'y': None}
 
         for pos_id in range (self.window_nb):
 
@@ -116,22 +141,27 @@ class VideoGraph:
             xf = rfftfreq(self.window_width, 1 / sample_rate)
             yf = np.abs( rfft(signal_window) )
             yf = yf * (xf > freq_cutoff_min) * (xf < freq_cutoff_max)  # apply cutoff
+            yf = yf * (yf - amplitude_threshold > 0.)  # apply thresholding
 
-            # Save rfft & minmax
+            # Save rfft
             self.__plots[plot_id] .append( (xf, yf) )
-            rfft_min = min(yf)
-            rfft_max = max(yf)
-            if rfft_min < self.__minmax[plot_id][0]: self.__minmax[plot_id][0] = rfft_min
-            if rfft_max > self.__minmax[plot_id][1]: self.__minmax[plot_id][1] = rfft_max
+
+            # Save minmax
+            if fix_scale_y:
+                rfft_min = min(yf)
+                rfft_max = max(yf)
+                if amplitude_threshold==float('-inf') and rfft_min < self.__minmax[plot_id]['y'][0]: self.__minmax[plot_id]['y'][0] = rfft_min
+                if rfft_max > self.__minmax[plot_id]['y'][1]: self.__minmax[plot_id]['y'][1] = rfft_max
+
+        if amplitude_threshold!=float('-inf'): self.__minmax[plot_id]['y'][0] = amplitude_threshold
+        if not fix_scale_x: self.__minmax[plot_id]['x'] = list((None, None))
+        if not fix_scale_y: self.__minmax[plot_id]['y'] = list((None, None))
 
 
-    def save (self, folder = None, plots = 'all'):
+    def save (self, folder=None, plots='all', figsize=(15, 10), video_fps=10):
         # Specify plots to get a specific order
 
         print('Saving frames')
-
-        figsize = (15, 10)
-        fps = 10
 
         # Select plots
         selected_ids = list()
@@ -164,7 +194,10 @@ class VideoGraph:
 
                 # Plot image
                 plt.figure(figsize=figsize)
-                plt.ylim((self.__minmax[plot_id][0], self.__minmax[plot_id][1]))
+                if fix_scale_x and self.__minmax[plot_id]['x'] not in (None, list((None, None))): plt.xlim( (self.__minmax[plot_id]['x'][0], self.__minmax[plot_id]['x'][1]) )
+                if fix_scale_y and self.__minmax[plot_id]['y'] not in (None, list((None, None))): plt.ylim( (self.__minmax[plot_id]['y'][0], self.__minmax[plot_id]['y'][1]) )
+                if self.__ticks [plot_id]['x'] != None: plt.xticks(self.__ticks[plot_id]['x'])
+                if self.__ticks [plot_id]['y'] != None: plt.yticks(self.__ticks[plot_id]['y'])
                 plt.plot(x, y)
 
                 plt.xlabel(self.__labels[plot_id][0])
@@ -192,37 +225,26 @@ class VideoGraph:
         for plot_id in selected_ids:
             path = os.path.join(savedir, f'{plot_id}.mp4')
             image_path = os.path.join(savedir, f'{plot_id}-%01d.png')
-            os.system(f'ffmpeg -r {fps} -i {image_path} -vcodec mpeg4 -y {path}')
+            os.system(f'ffmpeg -r {video_fps} -i {image_path} -vcodec mpeg4 -y {path}')
         
         # Save stack video
         path = os.path.join(savedir, f'stack.mp4')
         stack_path = os.path.join(savedir, 'stack-%01d.png')
-        os.system(f'ffmpeg -r {fps} -i {stack_path} -vcodec mpeg4 -y {path}')
+        os.system(f'ffmpeg -r {video_fps} -i {stack_path} -vcodec mpeg4 -y {path}')
 
 
+window_width = int(1e6)
+window_step  = int(1e4)
 
-# window_width = int(1e6)
-# window_step  = int(1e4) # int(1e5)
+video_graph = VideoGraph (
+    signal=data_0,
+    sample_rate=sample_rate,
+    window_width=window_width,
+    window_step=window_step
+)
 
-# video_graph = VideoGraph (
-#     signal=data_0,
-#     sample_rate=sample_rate,
-#     window_width=window_width,
-#     window_step=window_step
-# )
+print(video_graph)
+print('\n')
 
-# video_graph.plot_rfft()
-# video_graph.save(plots=['rfft', 'signal'])
-
-
-# issue: min and max of signal are not the right ones
-
-
-sig = data_0
-xf = rfftfreq(data_0.shape[0], 1 / sample_rate)
-yf = np.abs( rfft(data_0) )
-
-freq_cutoff_min = 1.50037510e-02 # 0
-freq_cutoff_max = 4.79999700e+04  #float("inf")
-print(yf * (xf > freq_cutoff_min) * (xf < freq_cutoff_max))
-
+video_graph.plot_rfft(freq_cutoff_min=1000, freq_cutoff_max=25000)
+video_graph.save(plots=['rfft', 'signal'])
