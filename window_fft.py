@@ -90,7 +90,7 @@ class VideoGraph:
         self.__plots  [plot_id] = list()
         self.__minmax [plot_id] = {'x': list((None, None)), 'y': list((None, None))}
         self.__labels [plot_id] = ('Time [sec]', 'Amplitude')
-        self.__ticks  [plot_id] = {'x': list(range(0, self.signal_length, 50000)), 'y': None}
+        self.__ticks  [plot_id] = {'x': [round(i/self.sample_rate, 1) for i in range(0, self.signal_length, 50000)], 'y': None}
         
         for pos_id in range (self.window_nb):
             window_start = pos_id * self.window_step
