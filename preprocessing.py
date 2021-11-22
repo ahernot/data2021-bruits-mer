@@ -137,14 +137,45 @@ data_1 = data[:, 1]
 plt.figure(figsize=(15, 10))
 
 # Process signal
-data = data_0
+data = data_0[:100]
 signal = Signal (data, sample_rate) #[:10000]
 signal.standardise()
 plt.plot(signal.time, signal.data)
 
 # Smooth signal
-signal.smooth_test1(500)
-signal.plot()
+signal.smooth_test1(50, window='flat')
+plt.plot(signal.time, signal.data, label='flat')
+
+
+
+
+
+
+
+
+signal2 = Signal (data, sample_rate) #[:10000]
+signal2.standardise()
+signal2.smooth_test1(50, window='hanning')
+plt.plot(signal2.time, signal2.data, label='hanning')
+
+signal3 = Signal (data, sample_rate) #[:10000]
+signal3.standardise()
+signal3.smooth_test1(50, window='hamming')
+plt.plot(signal3.time, signal3.data, label='hamming')
+
+signal4 = Signal (data, sample_rate) #[:10000]
+signal4.standardise()
+signal4.smooth_test1(50, window='bartlett')
+plt.plot(signal4.time, signal4.data, label='bartlett (default)')
+
+signal5 = Signal (data, sample_rate) #[:10000]
+signal5.standardise()
+signal5.smooth_test1(50, window='blackman')
+plt.plot(signal5.time, signal5.data, label='blackman')
+
+plt.legend()
+plt.show()
+#signal.plot()
 
 
 
