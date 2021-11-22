@@ -1,6 +1,7 @@
 # for standardisation
 from sklearn.preprocessing import StandardScaler
 from scipy.io import wavfile
+from scipy import signal as sg
 
 # for smoothing
 from sklearn.neighbors import KernelDensity
@@ -58,6 +59,16 @@ class Signal:
 
         print(self.data.shape)
 
+    def smooth_test2 (self):
+        # Create an order 3 lowpass butterworth filter
+        #b, a = sg.butter(3, 0.05)
+        b, a = sg.butter(3, 0.021)  # lower is smoother
+        b, a = sg.cheby1(3, 10, 100, 'hp', fs=1000)
+    
+
+        sig_filt = sg.lfilter(b, a, self.data)#, axis=- 1, zi=None)
+        self.data = sig_filt
+
 
     def smooth (self):
 
@@ -99,21 +110,23 @@ sample_rate, data = wavfile.read(filepath)
 data_0 = data[:, 0]
 data_1 = data[:, 1]
 
+plt.figure(figsize=(15, 10))
+
 # Process signal
-signal = Signal (data_0[:10000], sample_rate)
+signal = Signal (data_0[:1000], sample_rate) #[:10000]
 signal.standardise()
+plt.plot(signal.time, signal.data)
+
 
 
 
 # signal.smooth_demo(50)
 # plt.plot(np.arange(signal.data.shape[0]), signal.data)
 
-plt.figure(figsize=(15, 10))
-# plt.plot(signal.time, signal.data)
+signal.smooth_test2()
+plt.plot(signal.time, signal.data)
 
 plt.show()
-
-
 
 
 
