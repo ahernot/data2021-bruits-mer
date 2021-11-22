@@ -51,7 +51,7 @@ class Signal:
         self.modifiers .append('standardisation')
 
 
-    def smooth_test1 (self, window_len=11, window='hanning'):
+    def smooth_window (self, window_len=11, window='hanning'):
         if self.data.ndim != 1: raise (ValueError, "smooth only accepts 1 dimension arrays.")
         if self.data.size < window_len: raise (ValueError, "Input vector needs to be bigger than window size.")
         if window_len<3: return self.data
@@ -91,6 +91,8 @@ class Signal:
         # Fetch kde samples along x-axis
         log_dens = kde.score_samples(xvals.reshape(-1, 1))
 
+        # score_samples returns the log of the probability density
+
         # plt.plot(xvals, signal)
 
         plt.figure(figsize=(15, 10))
@@ -109,23 +111,7 @@ class Signal:
 
         self.modifiers .append('kernel smoothing')
 
-
-
-    def plot (self, new=False):
-        
-        # Initialise plot
-        if not self.plotted or new:
-            plt.figure(figsize=(15, 10))
-
-        # Plot
-        plt.plot(self.time, self.data, label='')
-
-        # Add axis labels
-        plt.ylabel('amplitude')
-        max_abs = max(abs(min(self.data)), abs(max(self.data)))
-        plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
-        plt.xlabel('time [s]')
-        plt.xticks(np.linspace(0, self.signal_len, 15))  # math.ceil(self.signal_len), 15))
+            
 
         
 
@@ -139,20 +125,27 @@ sample_rate, data = wavfile.read(filepath)
 data_0 = data[:, 0]
 data_1 = data[:, 1]
 
+plt.figure(figsize=(15, 10))
+
 # Process signal
 data = data_0[:10000]
 signal = Signal (data, sample_rate) #[:10000]
 signal.standardise()
-signal.plot()
+plt.plot(signal.time, signal.data, label='')  # plot
 
 # Smooth signal
-signal.smooth_test1(50, window='bartlett')
-signal.plot()
+signal.smooth_window(50, window='bartlett')
+plt.plot(signal.time, signal.data, label='')  # plot
+
+# Add axis labels
+plt.ylabel('amplitude')
+max_abs = max(abs(min(signal.data)), abs(max(signal.data)))
+plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
+plt.xlabel('time [s]')
+plt.xticks(np.linspace(0, signal.signal_len, 15))  # math.ceil(signal.signal_len), 15))
 plt.show()
 
 
-
-# score_samples returns the log of the probability density
 
 
 
