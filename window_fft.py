@@ -53,12 +53,12 @@ class VideoGraph:
 
     def __init__ (self, signal:np.ndarray, sample_rate:int, window_width:int=100, window_step:int=1):
         self.signal = signal
-        self.signal_length = signal.shape[0]
+        self.samples_nb = signal.shape[0]
         self.sample_rate = sample_rate
 
         self.window_width = window_width
         self.window_step = window_step
-        self.window_nb = math.floor((self.signal_length - window_width) / window_step) + 1
+        self.window_nb = math.floor((self.samples_nb - window_width) / window_step) + 1
 
         self.__plots = dict()
         self.__minmax = dict()
@@ -68,7 +68,7 @@ class VideoGraph:
     def __repr__ (self):
         desc_list = [
             'VideoGraph object',
-            f' Signal length (samples): {self.signal_length}',
+            f' Signal length (samples): {self.samples_nb}',
             f' Sampling rate (Hz):      {self.sample_rate}',
             '',
             f' Window width (samples):  {self.window_width}',
@@ -90,7 +90,7 @@ class VideoGraph:
         self.__plots  [plot_id] = list()
         self.__minmax [plot_id] = {'x': list((None, None)), 'y': list((None, None))}
         self.__labels [plot_id] = ('Time [sec]', 'Amplitude')
-        self.__ticks  [plot_id] = {'x': [round(i/self.sample_rate, 1) for i in range(0, self.signal_length, 50000)], 'y': None}
+        self.__ticks  [plot_id] = {'x': [round(i/self.sample_rate, 1) for i in range(0, self.samples_nb, 50000)], 'y': None}
         
         for pos_id in range (self.window_nb):
             window_start = pos_id * self.window_step
