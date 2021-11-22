@@ -25,6 +25,7 @@ class Signal:
         self.signal_len = self.samples_nb / sample_rate  # length of signal, in seconds
         self.time = np.linspace(0, self.samples_nb / self.sample_rate, self.samples_nb)
 
+        self.plotted = False
         self.modifiers = list()
 
     def __repr__ (self):
@@ -110,19 +111,23 @@ class Signal:
 
 
 
-    def plot (self):
+    def plot (self, new=False):
+        
+        # Initialise plot
+        if not self.plotted or new:
+            plt.figure(figsize=(15, 10))
 
-        plt.figure(figsize=(15, 10))
-        plt.plot(self.time, self.data)
+        # Plot
+        plt.plot(self.time, self.data, label='')
 
+        # Add axis labels
         plt.ylabel('amplitude')
         max_abs = max(abs(min(self.data)), abs(max(self.data)))
         plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
-
         plt.xlabel('time [s]')
-        plt.xticks(np.linspace(0, math.ceil(self.signal_len), 15))
+        plt.xticks(np.linspace(0, self.signal_len, 15))  # math.ceil(self.signal_len), 15))
 
-        plt.show()
+        
 
 
 
@@ -134,58 +139,16 @@ sample_rate, data = wavfile.read(filepath)
 data_0 = data[:, 0]
 data_1 = data[:, 1]
 
-plt.figure(figsize=(15, 10))
-
 # Process signal
-data = data_0[:100]
+data = data_0[:10000]
 signal = Signal (data, sample_rate) #[:10000]
 signal.standardise()
-plt.plot(signal.time, signal.data)
+signal.plot()
 
 # Smooth signal
-signal.smooth_test1(50, window='flat')
-plt.plot(signal.time, signal.data, label='flat')
-
-
-
-
-
-
-
-
-signal2 = Signal (data, sample_rate) #[:10000]
-signal2.standardise()
-signal2.smooth_test1(50, window='hanning')
-plt.plot(signal2.time, signal2.data, label='hanning')
-
-signal3 = Signal (data, sample_rate) #[:10000]
-signal3.standardise()
-signal3.smooth_test1(50, window='hamming')
-plt.plot(signal3.time, signal3.data, label='hamming')
-
-signal4 = Signal (data, sample_rate) #[:10000]
-signal4.standardise()
-signal4.smooth_test1(50, window='bartlett')
-plt.plot(signal4.time, signal4.data, label='bartlett (default)')
-
-signal5 = Signal (data, sample_rate) #[:10000]
-signal5.standardise()
-signal5.smooth_test1(50, window='blackman')
-plt.plot(signal5.time, signal5.data, label='blackman')
-
-plt.legend()
+signal.smooth_test1(50, window='bartlett')
+signal.plot()
 plt.show()
-#signal.plot()
-
-
-
-# signal.smooth_test2()
-# plt.plot(signal.time, signal.data)
-
-
-
-
-
 
 
 
