@@ -9,6 +9,8 @@ from sklearn.neighbors import KernelDensity
 import numpy as np
 import matplotlib.pyplot as plt
 
+import math
+
 from preferences import *
 
 
@@ -18,7 +20,9 @@ class Signal:
         self.data = data
         self.data_line = self.data.reshape(-1, 1)
         self.sample_rate = sample_rate
-        self.samples_nb = data.shape[0]        
+        self.samples_nb = data.shape[0]
+        
+        self.signal_len = self.samples_nb / sample_rate  # length of signal, in seconds
         self.time = np.linspace(0, self.samples_nb / self.sample_rate, self.samples_nb)
 
         self.modifiers = list()
@@ -27,6 +31,7 @@ class Signal:
         desc_list = [
             'Signal object',
             f' Signal length (samples): {self.samples_nb}',
+            f' Signal length (seconds): {self.signal_len}',
             f' Sampling rate (Hz):      {self.sample_rate}',
             f' Modifiers:'
         ]
@@ -45,25 +50,28 @@ class Signal:
         self.modifiers .append('standardisation')
 
 
-    def smooth_demo(self, window_len=11, window='hanning'):
+    def smooth_test1 (self, window_len=11, window='hanning'):
         if self.data.ndim != 1: raise (ValueError, "smooth only accepts 1 dimension arrays.")
         if self.data.size < window_len: raise (ValueError, "Input vector needs to be bigger than window size.")
         if window_len<3: return self.data
         if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']: raise (ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
-        s = np.r_[ self.data[window_len-1:0:-1], self.data, self.data[-2:-window_len-1:-1] ]  # pad signal on both sides
+        data_padded = np.r_[ self.data[window_len-1:0:-1], self.data, self.data[-2:-window_len-1:-1] ]  # pad signal on both sides
 
+        # Generate window
         if window == 'flat': w = np.ones(window_len, 'd')  # moving average
         else: w = eval('np.' + window + '(window_len)')
-        self.data = np.convolve(w / w.sum(), s, mode='valid')
 
-        print(self.data.shape)
+        # Apply window convolution
+        self.data = np.convolve(w / w.sum(), data_padded, mode='valid')
+        self.data = self.data[math.floor((window_len-1)/2):-1*math.ceil((window_len+1)/2)+1]  # remove excess from padding
+
 
     def smooth_test2 (self):
         # Create an order 3 lowpass butterworth filter
         #b, a = sg.butter(3, 0.05)
         b, a = sg.butter(3, 0.021)  # lower is smoother
-        b, a = sg.cheby1(3, 10, 100, 'hp', fs=1000)
+        #b, a = sg.cheby1(3, 10, 100, 'hp', fs=1000)
     
 
         sig_filt = sg.lfilter(b, a, self.data)#, axis=- 1, zi=None)
@@ -102,6 +110,22 @@ class Signal:
 
 
 
+    def plot (self):
+
+        plt.figure(figsize=(15, 10))
+        plt.plot(self.time, self.data)
+
+        plt.ylabel('amplitude')
+        max_abs = max(abs(min(self.data)), abs(max(self.data)))
+        plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
+
+        plt.xlabel('time [s]')
+        plt.xticks(np.linspace(0, math.ceil(self.signal_len), 15))
+
+        plt.show()
+
+
+
 # Read file
 filepath = RESOURCES_PATH + 'samples/2020_01_28_3A/2020_01_28_1.wav'  # use OS path objects
 sample_rate, data = wavfile.read(filepath)
@@ -113,20 +137,22 @@ data_1 = data[:, 1]
 plt.figure(figsize=(15, 10))
 
 # Process signal
-signal = Signal (data_0[:1000], sample_rate) #[:10000]
+data = data_0
+signal = Signal (data, sample_rate) #[:10000]
 signal.standardise()
 plt.plot(signal.time, signal.data)
 
+# Smooth signal
+signal.smooth_test1(500)
+signal.plot()
 
 
 
-# signal.smooth_demo(50)
-# plt.plot(np.arange(signal.data.shape[0]), signal.data)
+# signal.smooth_test2()
+# plt.plot(signal.time, signal.data)
 
-signal.smooth_test2()
-plt.plot(signal.time, signal.data)
 
-plt.show()
+
 
 
 
