@@ -73,7 +73,6 @@ class Signal:
         #b, a = sg.butter(3, 0.05)
         b, a = sg.butter(3, 0.021)  # lower is smoother
         #b, a = sg.cheby1(3, 10, 100, 'hp', fs=1000)
-    
 
         sig_filt = sg.lfilter(b, a, self.data)#, axis=- 1, zi=None)
         self.data = sig_filt
@@ -125,28 +124,25 @@ sample_rate, data = wavfile.read(filepath)
 data_0 = data[:, 0]
 data_1 = data[:, 1]
 
-plt.figure(figsize=(15, 10))
+# plt.figure(figsize=(15, 10))
 
 # Process signal
-data = data_0[:10000]
+data = data_0#[:10000]
 signal = Signal (data, sample_rate) #[:10000]
 signal.standardise()
-plt.plot(signal.time, signal.data, label='')  # plot
+# plt.plot(signal.time, signal.data, label='')  # plot
 
 # Smooth signal
 signal.smooth_window(50, window='bartlett')
-plt.plot(signal.time, signal.data, label='')  # plot
+# plt.plot(signal.time, signal.data, label='')  # plot
 
 # Add axis labels
-plt.ylabel('amplitude')
-max_abs = max(abs(min(signal.data)), abs(max(signal.data)))
-plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
-plt.xlabel('time [s]')
-plt.xticks(np.linspace(0, signal.signal_len, 15))  # math.ceil(signal.signal_len), 15))
-plt.show()
-
-
-
+# plt.ylabel('amplitude')
+# max_abs = max(abs(min(signal.data)), abs(max(signal.data)))
+# plt.yticks(np.linspace(math.floor(-max_abs), math.ceil(max_abs), 15))
+# plt.xlabel('time [s]')
+# plt.xticks(np.linspace(0, signal.signal_len, 15))  # math.ceil(signal.signal_len), 15))
+# plt.show()
 
 
 
@@ -154,3 +150,25 @@ plt.show()
 
 # wavelet denoising
 pass
+
+
+
+
+# VIDEOGRAPH
+from window_fft import VideoGraph
+
+window_width = int(1e6)
+window_step  = int(1e5)
+
+video_graph = VideoGraph (
+    signal=signal.data,
+    sample_rate=sample_rate,
+    window_width=window_width,
+    window_step=window_step
+)
+
+print(video_graph)
+print('\n')
+
+video_graph.plot_rfft(freq_cutoff_min=1000, freq_cutoff_max=25000)
+video_graph.save(plots=['rfft', 'signal'])

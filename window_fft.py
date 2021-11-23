@@ -111,8 +111,8 @@ class VideoGraph:
             if fix_scale_y:
                 signal_min = min(signal_window)
                 signal_max = max(signal_window)
-                if signal_min < self.__minmax[plot_id]['y'][0]: self.__minmax[plot_id]['y'][0] = signal_min
-                if signal_max > self.__minmax[plot_id]['y'][1]: self.__minmax[plot_id]['y'][1] = signal_max
+                if (self.__minmax[plot_id]['y'][0] == None) or (signal_min < self.__minmax[plot_id]['y'][0]): self.__minmax[plot_id]['y'][0] = signal_min
+                if (self.__minmax[plot_id]['y'][1] == None) or (signal_max > self.__minmax[plot_id]['y'][1]): self.__minmax[plot_id]['y'][1] = signal_max
         if not fix_scale_y: self.__minmax[plot_id]['y'] = list((None, None))
 
 
@@ -150,8 +150,8 @@ class VideoGraph:
             if fix_scale_y:
                 rfft_min = min(yf)
                 rfft_max = max(yf)
-                if amplitude_threshold==float('-inf') and rfft_min < self.__minmax[plot_id]['y'][0]: self.__minmax[plot_id]['y'][0] = rfft_min
-                if rfft_max > self.__minmax[plot_id]['y'][1]: self.__minmax[plot_id]['y'][1] = rfft_max
+                if (self.__minmax[plot_id]['y'][0] != None) and (amplitude_threshold == float('-inf')) and (rfft_min < self.__minmax[plot_id]['y'][0]): self.__minmax[plot_id]['y'][0] = rfft_min
+                if (self.__minmax[plot_id]['y'][1] != None) and (rfft_max > self.__minmax[plot_id]['y'][1]): self.__minmax[plot_id]['y'][1] = rfft_max
 
         if amplitude_threshold!=float('-inf'): self.__minmax[plot_id]['y'][0] = amplitude_threshold
         if not fix_scale_x: self.__minmax[plot_id]['x'] = list((None, None))
@@ -194,8 +194,8 @@ class VideoGraph:
 
                 # Plot image
                 plt.figure(figsize=figsize)
-                if fix_scale_x and self.__minmax[plot_id]['x'] not in (None, list((None, None))): plt.xlim( (self.__minmax[plot_id]['x'][0], self.__minmax[plot_id]['x'][1]) )
-                if fix_scale_y and self.__minmax[plot_id]['y'] not in (None, list((None, None))): plt.ylim( (self.__minmax[plot_id]['y'][0], self.__minmax[plot_id]['y'][1]) )
+                if self.__minmax[plot_id]['x'] not in (None, list((None, None))): plt.xlim( (self.__minmax[plot_id]['x'][0], self.__minmax[plot_id]['x'][1]) )
+                if self.__minmax[plot_id]['y'] not in (None, list((None, None))): plt.ylim( (self.__minmax[plot_id]['y'][0], self.__minmax[plot_id]['y'][1]) )
                 if self.__ticks [plot_id]['x'] != None: plt.xticks(self.__ticks[plot_id]['x'])
                 if self.__ticks [plot_id]['y'] != None: plt.yticks(self.__ticks[plot_id]['y'])
                 plt.plot(x, y)
@@ -233,18 +233,18 @@ class VideoGraph:
         os.system(f'ffmpeg -r {video_fps} -i {stack_path} -vcodec mpeg4 -y {path}')
 
 
-window_width = int(1e6)
-window_step  = int(1e4)
+# window_width = int(1e6)
+# window_step  = int(1e4)
 
-video_graph = VideoGraph (
-    signal=data_0,
-    sample_rate=sample_rate,
-    window_width=window_width,
-    window_step=window_step
-)
+# video_graph = VideoGraph (
+#     signal=data_0,
+#     sample_rate=sample_rate,
+#     window_width=window_width,
+#     window_step=window_step
+# )
 
-print(video_graph)
-print('\n')
+# print(video_graph)
+# print('\n')
 
-video_graph.plot_rfft(freq_cutoff_min=1000, freq_cutoff_max=25000)
-video_graph.save(plots=['rfft', 'signal'])
+# video_graph.plot_rfft(freq_cutoff_min=1000, freq_cutoff_max=25000)
+# video_graph.save(plots=['rfft', 'signal'])
