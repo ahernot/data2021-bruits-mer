@@ -15,6 +15,7 @@ import shutil
 
 from preferences import *
 
+##### REPRÉSENTER LES TRANSFORMÉES DE FOURIER EN ÉCHELLE LOG SUR L'AXE Y !!!!!!!
 
 
 
