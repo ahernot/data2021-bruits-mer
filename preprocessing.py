@@ -41,8 +41,6 @@ class Signal:
 
 
     def standardise (self):
-        data_reshaped = self.data.reshape(-1, 1)
-
         scaler = StandardScaler()
         scaler.fit(self.data_line)  # unlimited lines, one column
         data_std = scaler.transform(self.data_line).flatten()
