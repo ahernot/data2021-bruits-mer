@@ -155,7 +155,7 @@ pass
 
 
 # VIDEOGRAPH
-from window_fft import VideoGraph
+from legacy.window_fft import VideoGraph
 
 window_width = int(1e6)
 window_step  = int(1e5)
