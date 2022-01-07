@@ -42,20 +42,20 @@ def absorption (f: float, depth: float, temperature: float, salinity: float, pH:
 
 
 
-kwargs = {
-    'depth': 0.05,
-    'temperature': 8,
-    'salinity': 35,
-    'pH': 8
-}
+# kwargs = {
+#     'depth': 0.05,
+#     'temperature': 8,
+#     'salinity': 35,
+#     'pH': 8
+# }
 
-print(absorption(1, **kwargs))
+# print(absorption(1, **kwargs))
 
-frequencies = np.linspace (1e-1, 1e3, 100)
-absorptions = absorption (frequencies, **kwargs)
+# frequencies = np.linspace (1e-1, 1e3, 100)
+# absorptions = absorption (frequencies, **kwargs)
 
-plt.figure (figsize=(15, 10))
-plt.loglog(frequencies, absorptions)
-plt.xlabel('Frequency (kHz)')
-plt.ylabel('Absorption (dB/km)')
-plt.show()
+# plt.figure (figsize=(15, 10))
+# plt.loglog(frequencies, absorptions)
+# plt.xlabel('Frequency (kHz)')
+# plt.ylabel('Absorption (dB/km)')
+# plt.show()
