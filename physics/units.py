@@ -200,6 +200,9 @@ def gen():
     print(_u_mass)
 
 
+
+# TODO: make a script that works with powers of 10 only, with exact results (combine into float at the end)
+# TODO: make an addition to deal with non-base10 systems
 class DimensionedValue:
     def __init__(self, val, unit: str):
         self.__val = val
