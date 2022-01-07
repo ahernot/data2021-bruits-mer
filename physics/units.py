@@ -3,6 +3,22 @@ import numpy as np
 UNITS = {"mass": {"": ""}}
 
 
+UNITS_DICT = {
+    'fg': 'mass',
+    'pg': 'mass',
+    'ng': 'mass',
+    'mig': 'mass',
+    'mg': 'mass',
+    'cg':  'mass',
+    'dg':  'mass',
+    'g':   'mass',
+    'dag': 'mass',
+    'hg':  'mass',
+    'kg':  'mass',
+    't':   'mass'
+}
+
+
 # {'fg': 1e-18, 'pg': 1e-15, 'ng': 1e-12, 'mig': 1e-9, 'mg': 1e-6, 'cg': 1e-5, 'dg': 1e-4, 'g': 1e-3, 'dag': 1e-2, 'hg': 1e-1, 'kg': 1, 't': 1e3}
 
 _U_MASS = {
@@ -192,7 +208,7 @@ def gen():
         # Manually fill line
         _u_mass[unit] = dict()
         for j, unit_2 in enumerate(units):
-            _u_mass[unit][unit_2] = f"1e{masses[j]}"
+            _u_mass[unit][unit_2] = f"1e{-1 * masses[j]}"
 
         # _u_mass [unit] = dict(zip(units, np.power(10, masses)))
 
@@ -200,10 +216,9 @@ def gen():
     print(_u_mass)
 
 
-
 # TODO: make a script that works with powers of 10 only, with exact results (combine into float at the end)
 # TODO: make an addition to deal with non-base10 systems
-class DimensionedValue:
+class DimensionedValue_old:
     def __init__(self, val, unit: str):
         self.__val = val
         self.__unit = unit.lower()
@@ -220,3 +235,124 @@ class DimensionedValue:
         return self.__val * multiplier
 
 
+
+
+
+#################
+
+
+
+
+
+import json
+
+with open('physics/units.json', 'r', encoding='utf-8') as units_db:
+    UNITS = json.load(units_db)
+
+
+
+
+class DimensionedValue:
+    """
+    base-10 units only
+    case-sensitive
+
+    methods from https://docs.python.org/3/reference/datamodel.html#emulating-numeric-types
+    """
+
+    def __init__ (self, val, unit: str):
+        self.__val = val
+        self.__unit = unit
+
+        try: self.dimension = UNITS_DICT[unit]
+        except KeyError: print(f'unit "{unit}" not supported')
+
+        self.__conversion_dict = UNITS[self.dimension]
+
+
+    def __repr__ (self):
+        return f"{self.__val} {self.__unit}"
+
+    def __call__ (self, unit: str) -> float or int:
+        multiplier = float(self.__conversion_dict [self.__unit] [unit])
+        return self.__val * multiplier
+
+
+
+    def __neg__ (self):
+        return DimensionedValue (self.__val.__neg__(), self.__unit)
+    def __pos__ (self):
+        return DimensionedValue (self.__val.__pos__(), self.__unit)
+    def __abs__ (self):
+        return DimensionedValue (self.__val.__abs__(), self.__unit)
+    def __invert__ (self):
+        return DimensionedValue (self.__val.__invert__(), self.__unit)
+
+
+    def __add__ (self, other):
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Adding objects of different dimensions')
+            return DimensionedValue(self.__val + other(self.__unit), self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return DimensionedValue(self.__val + other, self.__unit)  # assuming that the units are the same
+        else:
+            return NotImplementedError
+    def __radd__ (self, other):
+        return self.__add__(other)
+    def __sub__ (self, other): 
+        return self .__add__(other.__neg__())
+    def __rsub__ (self, other):
+        return self.__neg__() .__radd__(other)
+        
+
+    def __mul__ (self, other):
+        if isinstance(other, DimensionedValue):
+            raise NotImplementedError  # to fix
+        elif isinstance(other, float) or isinstance(other, int):
+            return DimensionedValue(self.__val * other, self.__unit)
+        else:
+            return NotImplementedError
+    def __rmul__ (self, other):
+        return self.__mul__(other)
+
+    def __truediv__ (self, other):
+        if isinstance(other, DimensionedValue):
+            raise NotImplementedError
+            return DimensionedValue(self.__val__ .__truediv__(other.__val), self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return DimensionedValue(self.__val .__truediv__(other), self.__unit)
+        else:
+            return NotImplementedError
+    def __rtruediv__ (self, other):
+        if isinstance(other, DimensionedValue):
+            raise NotImplementedError
+        elif isinstance(other, float) or isinstance(other, int):
+            raise NotImplementedError
+            return DimensionedValue(other.__truediv__(self.__val), self.__unit)
+        else:
+            return NotImplementedError
+
+
+    def __lt__ (self, other):
+        return NotImplementedError
+    def __le__ (self, other):
+        return NotImplementedError
+    def __eq__ (self, other):
+        return NotImplementedError
+    def __ne__ (self, other):
+        return NotImplementedError
+    def __gt__ (self, other):
+        return NotImplementedError
+    def __ge__ (self, other):
+        return NotImplementedError
+
+    def __round__ (self, ndigits: int):
+        raise NotImplementedError
+    def __trunc__ (self):
+        raise NotImplementedError
+    def __floor__ (self):
+        raise NotImplementedError
+    def __ceil__ (self):
+        raise NotImplementedError
+
+    
