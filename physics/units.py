@@ -1,6 +1,8 @@
 import numpy as np
 
 # TODO: SORTING FUNCTION for self.__units
+# TODO: __call__ function (make an unit_list parsing function to avoid copy-pasting the same code all over) => work with UNITS or DIMENSIONS?
+
 
 UNITS = {"mass": {"": ""}}
 
@@ -253,12 +255,20 @@ with open('physics/units.json', 'r', encoding='utf-8') as units_db:
 
 
 
-
 # DimensionedValue (10, kg)
 # DimensionedValue (10, (kg, 1))
 # DimensionedValue (10, (kg, 1), (m, 2))
 # ! DimensionedValue (10, (kg, m), (1, 2))
 # DimensionedValue (10, kg^2)  # string parsing
+# WHAT IF DV(10kg, 7g)???? wtf
+
+
+def dimension_sort (dimension):
+    pass
+
+def parse_units_list (*units):
+    pass
+
 class DimensionedValue:
     """
     base-10 units only
@@ -314,10 +324,7 @@ class DimensionedValue:
 
             # Match known unit to its dimension
             try: dim = UNITS_DICT[unit]
-            # except KeyError: raise ValueError(f'unit "{unit}" not supported')
-            except KeyError:
-                print(f'unit "{unit}" not supported')
-                dim = unit
+            except KeyError: raise ValueError(f'unit "{unit}" not supported')
             
             pwr = self.__units_dict[unit]
             if pwr == 0: continue
@@ -329,8 +336,8 @@ class DimensionedValue:
         self.__conversion_dicts = dict()
         for dim, pwr in self.dimension:
             if pwr == 0: continue
-            conv_dict = UNIT_CONVERSIONS[self.dimension]
-            conv_dict_scaled = dict((unit, mult*pwr) for unit, mult in conv_dict.items())
+            conv_dict = UNIT_CONVERSIONS[dim]
+            conv_dict_scaled = dict((unit, mult**pwr) for unit, mult in conv_dict.items())
             self.__conversion_dicts[dim] = conv_dict_scaled
 
         
@@ -339,9 +346,13 @@ class DimensionedValue:
         # return f"{self.__val} {self.__unit}"
         return f'{self.__val} {self.__unit_str}'
 
-    def __call__ (self, unit: str) -> float or int:
-        multiplier = float(self.__conversion_dict [self.__unit] [unit])
-        return self.__val * multiplier
+    # def __call__ (self, unit: str) -> float or int:
+    #     multiplier = float(self.__conversion_dict [self.__unit] [unit])
+    #     return self.__val * multiplier
+
+    def __call__ (self, *units: list or tuple):
+
+        pass
 
 
 
