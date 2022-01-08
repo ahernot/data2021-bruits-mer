@@ -263,6 +263,7 @@ class DimensionedValue:
     def __init__ (self, val, unit: str):
         self.__val = val
         self.__unit = unit
+        self.__unit_pwr = 1
 
         try: self.dimension = UNITS_DICT[unit]
         except KeyError: print(f'unit "{unit}" not supported')
@@ -287,6 +288,16 @@ class DimensionedValue:
         return DimensionedValue (self.__val.__abs__(), self.__unit)
     def __invert__ (self):
         return DimensionedValue (self.__val.__invert__(), self.__unit)
+
+    def __round__ (self, ndigits: int):
+        return DimensionedValue(self.__val.__round__(ndigits=ndigits), self.__unit)
+    def __trunc__ (self):
+        return DimensionedValue(self.__val.__trunc__(), self.__unit)
+    def __floor__ (self):
+        return DimensionedValue(self.__val.__floor__(), self.__unit)
+    def __ceil__ (self):
+        return DimensionedValue(self.__val.__ceil__(), self.__unit)
+
 
 
     def __add__ (self, other):
@@ -334,25 +345,53 @@ class DimensionedValue:
 
 
     def __lt__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val < other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val < other
+        else:
+            return NotImplementedError
     def __le__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val <= other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val <= other
+        else:
+            return NotImplementedError
     def __eq__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val == other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val == other
+        else:
+            return NotImplementedError
     def __ne__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val != other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val != other
+        else:
+            return NotImplementedError
     def __gt__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val > other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val > other
+        else:
+            return NotImplementedError
     def __ge__ (self, other):
-        return NotImplementedError
+        if isinstance(other, DimensionedValue):
+            if self.dimension != other.dimension: raise ValueError('Comparing objects of different dimensions')
+            return self.__val >= other(self.__unit)
+        elif isinstance(other, float) or isinstance(other, int):
+            return self.__val >= other
+        else:
+            return NotImplementedError
 
-    def __round__ (self, ndigits: int):
-        raise NotImplementedError
-    def __trunc__ (self):
-        raise NotImplementedError
-    def __floor__ (self):
-        raise NotImplementedError
-    def __ceil__ (self):
-        raise NotImplementedError
 
     
