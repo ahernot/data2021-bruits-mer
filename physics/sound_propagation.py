@@ -316,14 +316,14 @@ def sound_velocity_mackenzie (S, T, z):
 
 
 
-import matplotlib.pyplot as plt
-plt.figure(figsize=(15, 10))
+# import matplotlib.pyplot as plt
+# plt.figure(figsize=(15, 10))
 
 
 
-S = np.linspace(0, 42, 100)
-T = np.linspace(-2, 40, 100)
-p = np.linspace(0, 1000, 100)
+# S = np.linspace(0, 42, 100)
+# T = np.linspace(-2, 40, 100)
+# p = np.linspace(0, 1000, 100)
 
 # rho = calc_rho(S, 5, 0)
 # dS_rho = calc_dS_rho(S, 5, 0)
@@ -344,9 +344,9 @@ p = np.linspace(0, 1000, 100)
 # c = sound_velocity_simplified(S, 5, 0)
 # plt.plot(S, c)
 
-c = sound_velocity_medwin(35, 5, p * 1e5)
-plt.plot(c, p)
+# c = sound_velocity_medwin(35, 5, p * 1e5)
+# plt.plot(c, p)
 
-plt.show()
+# plt.show()
 
 
