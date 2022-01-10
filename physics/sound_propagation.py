@@ -159,7 +159,6 @@ def calc_dp_rho (S, T, p):
     return dp_rho
 
 
-
 def freezing_temperature (S, p):
     """
     Millero & Leung equation (1976)
@@ -202,32 +201,12 @@ def calc_kappa_T (S, T, p):
     dp_rho = calc_dp_rho(S, T, p)
     return dp_rho / rho
 
-
-
 def sound_velocity (S, T, p):
     raise NotImplementedError
     kappa_T = calc_kappa_T(S, T, p)
     rho = calc_rho(S, T, p)
     return np.power(1 / (kappa_T * rho), 0.5)
 
-
-def sound_velocity_medwin_p (S, T, p):
-    """
-    Sound velocity in seawater (H. Medwin)
-    http://lecalve.univ-tln.fr/oceano/fiches/fiche3F.htm
-
-    :param S: Practical salinity (in ‰)
-    :param T: Temperature (in ℃)
-    :param p: Applied pressure (in Pa)
-    :return: Sound velocity (in m.s^-1)
-    """
-
-    c = 1449.2 + \
-        4.6 * T - 0.055 * np.power(T, 2) + 0.00029 * np.power(T, 3) + \
-        (1.34 - 0.01 * T) * (S - 35) + \
-        1.58e-6 * p  # 0,016 z 
-    
-    return c
 
 
 def sound_velocity_simplified (S, T, z):
@@ -301,52 +280,5 @@ def sound_velocity_mackenzie (S, T, z):
         0.016 * z + 0.0000001675 * np.power(z, 2)
     
     return c
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import matplotlib.pyplot as plt
-# plt.figure(figsize=(15, 10))
-
-
-
-# S = np.linspace(0, 42, 100)
-# T = np.linspace(-2, 40, 100)
-# p = np.linspace(0, 1000, 100)
-
-# rho = calc_rho(S, 5, 0)
-# dS_rho = calc_dS_rho(S, 5, 0)
-# plt.plot(S, rho)
-# plt.plot(S, dS_rho)
-
-# rho_35 = calc_rho(35, T, 0)
-# plt.plot(T, rho_35)
-
-# rho = calc_rho(35, 5, p)
-# dp_rho = calc_dp_rho(35, 5, p)
-# plt.plot(p, rho)
-# plt.plot(p, dp_rho)
-
-# beta = calc_beta(S, 5, 0)
-# plt.plot(S, beta)
-
-# c = sound_velocity_simplified(S, 5, 0)
-# plt.plot(S, c)
-
-# c = sound_velocity_medwin(35, 5, p * 1e5)
-# plt.plot(c, p)
-
-# plt.show()
 
 
