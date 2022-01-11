@@ -282,3 +282,43 @@ def sound_velocity_mackenzie (S, T, z):
     return c
 
 
+
+
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(15, 10))
+
+def calc_c (z):
+    # wrong because water temperature varies with depth
+    return sound_velocity_medwin(35, 5, z)
+def calc_dz_c (z):
+    # wrong because water temperature varies with depth
+    return -0.016
+
+# Initial conditions
+x0      = 0
+z0      = 0
+theta_0 = 1  #in radians
+c0      = calc_c(0)
+
+# Initialise differential solver parameters
+mult   = -1 * np.power(c0 / np.sin(theta_0), 2)  # differential equation multiplier
+x      = x0
+z      = z0
+dx_z   = 1 / np.tan(theta_0)
+dxdx_z = 0  # no initial curvature
+
+time_step = 0.2
+for t in np.arange(0, 100, time_step):
+    z    += dx_z * time_step
+    dx_z += dxdx_z * time_step
+
+    c = calc_c(z)
+    g = calc_dz_c(z)
+
+    dxdx_z = mult * g / np.power(c, 3)
+
+    x += 1
+    plt.scatter(x, z)
+
+plt.show()
