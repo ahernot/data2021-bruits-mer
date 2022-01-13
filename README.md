@@ -10,6 +10,13 @@ $$
 {\sin(\theta_1) \over c_1} = {\sin(\theta_0) \over c_0} = \sigma
 $$
 
+
+This leads to the differential equation:
+$$
+{\mathrm{d}^2 z \over \mathrm{d} x^2} = - \left( {c_0 \over \sin(\theta_0)} \right)^2 {g(z) \over {c(z)}^3}
+$$
+where $g = {\mathrm{d}c / \mathrm{d}z}$ is the gradient of $c$.
+
 <br>
 
 
@@ -38,5 +45,5 @@ Temperature versus salinity gradients below the ocean mixed layer:
 
 
 ## Resources
-- NOAA – World Ocean Database: https://www.ncei.noaa.gov/products/world-ocean-database
+- NOAA – World Ocean Database: https://www.ncei.noaa.gov/products/world-ocean-database (https://www.nodc.noaa.gov/access/)
 
