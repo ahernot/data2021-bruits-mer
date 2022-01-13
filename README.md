@@ -43,6 +43,29 @@ Temperature versus salinity gradients below the ocean mixed layer:
 
 
 
+<br><br>
+
+## Sound absorption in seawater
+The formula for the absorption of sound in seawater is as follows:
+$$
+\alpha = \alpha_{\mathrm{H}_3\mathrm{B}\mathrm{O}_3} e^{(\mathrm{pH}-8)/0.56} + \alpha_{\mathrm{Mg}\mathrm{S}\mathrm{O}_4}e^{z/6} + \alpha_{\mathrm{H}_2\mathrm{O}}e^{z/17-T/27} \ \mathrm{dB}\cdot\mathrm{km}^{-1}
+$$
+
+Where:
+* $\alpha_{\mathrm{H}_3\mathrm{B}\mathrm{O}_3} = 0.106 \frac{f_1 f^2}{f_1^2 + f^2}$ with $f_1 = 0.78\sqrt{S/35}\,e^{T/26}$ is the absorption due to the relaxation of the boric acid ($\mathrm{H}_3\mathrm{B}\mathrm{O}_3$) in solution ($f_1$ is the relaxation frequency, in $\mathrm{kHz}$)
+* $\alpha_{\mathrm{Mg}\mathrm{S}\mathrm{O}_4} = 0.52 \left( 1 + {T \over 43} \right)\left({S \over 35}\right) \frac{f_2 f^2}{f_2^2 + f^2}$ with $f_2 = 42 e^{T/17}$ is the absorption due to the relaxation of the magnesium sulfate ($\mathrm{Mg}\mathrm{S}\mathrm{O}_4$) in solution ($f_2$ is the relaxation frequency, in $\mathrm{kHz}$)
+* $\alpha_{\mathrm{H}_2\mathrm{O}} = 0.00049 f^2$ is the visquous absorption of pure water
+
+<br>
+
+* $f$ is the signal frequency (in $\mathrm{kHz}$)
+* $z$ is the altitude (in $\mathrm{km}$), negative under the surface
+* $T(z)$ is the seawater temperature (in ℃)
+* $S(z) \approx S$ is the seawater salinity (in $\mathrm{ppt}$)
+* $\mathrm{pH}$ is the seawater acidity ($\mathrm{pH} \simeq 8$)
+
+
+<br><br>
 
 ## Resources
 - NOAA – World Ocean Database: https://www.ncei.noaa.gov/products/world-ocean-database (https://www.nodc.noaa.gov/access/)
