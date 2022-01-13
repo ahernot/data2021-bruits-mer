@@ -62,7 +62,7 @@ Where:
 * $z$ is the altitude (in $\mathrm{km}$), negative under the surface
 * $T(z)$ is the seawater temperature (in ℃)
 * $S(z) \approx S$ is the seawater salinity (in $\mathrm{ppt}$)
-* $\mathrm{pH}$ is the seawater acidity ($\mathrm{pH} \simeq 8$)
+* $\mathrm{pH}(z) \simeq 8.1$ is the seawater acidity
 
 
 <br><br>
