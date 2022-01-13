@@ -7,7 +7,7 @@ def absorption (f: float, depth: float, temperature: float, salinity: float, pH:
     Ainslie and McColm 1998
     :param f: Signal frequency (in kHz)
     :param depth: Depth (in km)
-    :param temperature: Temperature (in °C)
+    :param temperature: Temperature (in ℃)
     :param salinity: Salinity (in ppt)
     :param pH: Acidity (pH)
     """
