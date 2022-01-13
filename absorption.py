@@ -1,7 +1,5 @@
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 def calc_absorption (f: float, z: float, T: float, S: float, pH: float):
     """
     Ainslie and McColm 1998
