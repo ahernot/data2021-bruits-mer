@@ -2,7 +2,7 @@
 
 
 
-### Propagation equations
+## Propagation equations
 Sound rays behave analogously to light rays. When traversing a medium, the change in their velocity induces an effect of refraction.
 
 The base equation for refraction of sound is
@@ -17,10 +17,29 @@ $$
 $$
 where $g = {\mathrm{d}c / \mathrm{d}z}$ is the gradient of $c$.
 
-<br>
+<br><br>
+
+## Computing reflections
+<img src="src/reflection-ground.jpeg" style="width:50%;">
+
+$$
+\alpha_\mathrm{ground} = \arctan \left({ \mathrm{d}z_\mathrm{ground} \over \mathrm{d}x}\right)
+$$
+$$
+\alpha_\mathrm{ray\_init} = \arctan \left({ \mathrm{d}z_\mathrm{ray\_init} \over \mathrm{d}x}\right)
+$$
+$$
+\gamma = \delta - \alpha = {\pi \over 2} - \alpha_\mathrm{ray\_init} - \alpha_\mathrm{ground}
+$$
+$$
+\alpha_\mathrm{ray\_fin} = {\pi \over 2} - \alpha_\mathrm{ground} + \gamma = \pi - \alpha_\mathrm{ray\_init} - 2 \alpha_\mathrm{ground}
+$$
+$$
+{ \mathrm{d}z_\mathrm{ray\_fin} \over \mathrm{d}x} = \tan \left( \alpha_\mathrm{ray\_fin} \right)
+$$
 
 
-
+<br><br>
 
 ## Oceanography
 
