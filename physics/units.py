@@ -1,3 +1,5 @@
+# Copyright Anatole Hernot (Mines Paris), 2022. All rights reserved.
+
 import numpy as np
 
 # TODO: SORTING FUNCTION for self.__units
