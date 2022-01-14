@@ -69,4 +69,4 @@ Where:
 
 ## Resources
 - NOAA – World Ocean Database: https://www.ncei.noaa.gov/products/world-ocean-database (https://www.nodc.noaa.gov/access/)
-
+- GEBCO Bathymetry data: https://download.gebco.net
