@@ -168,7 +168,17 @@ class Propagation2D:
 
         x_id = np.argmin(np.abs(self.X - x))
         absorption_dB = [self.A[f][x_id] for f in self.A.keys()]
-        return interpolate.interp1d(list(self.A.keys()), absorption_dB, kind='linear')
+
+        # Expand interpolation in [0, 25000] range (constant method)
+        x = list(self.A.keys())
+        if min(x) > 0.:
+            x = [0., ] + x
+            absorption_dB = [absorption_dB[0], ] + absorption_dB
+        if max(x) < 25000.:
+            x = x + [25000., ]
+            absorption_dB = absorption_dB + [absorption_dB[-1], ]
+        
+        return interpolate.interp1d(x, absorption_dB, kind='linear')
 
 
 
