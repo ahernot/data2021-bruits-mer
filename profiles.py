@@ -50,5 +50,5 @@ calc_pH = interpolate.interp1d(pH_profile.T[0][::-1], pH_profile.T[1][::-1], kin
 
 
 # Calculate sound velocity gradient
-calc_calc_dz_c = lambda calc_c, z_min, z_max, samples: interpolate.interp1d(z, np.gradient(calc_c(np.linspace(z_min, z_max, samples))), kind='quadratic')
+calc_calc_dz_c = lambda calc_c, z_min, z_max, samples: interpolate.interp1d(np.linspace(z_min, z_max, samples), np.gradient(calc_c(np.linspace(z_min, z_max, samples))), kind='quadratic')
 
