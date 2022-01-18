@@ -1,5 +1,7 @@
 import numpy as np
 from scipy import interpolate
+from physics.sound_propagation import *
+
 
 # TEMPERATURE PROFILE
 temperature_profile = np.array([
@@ -49,6 +51,10 @@ pH_profile = np.array([
 calc_pH = interpolate.interp1d(pH_profile.T[0][::-1], pH_profile.T[1][::-1], kind='linear')
 
 
-# Calculate sound velocity gradient
-calc_calc_dz_c = lambda calc_c, z_min, z_max, samples: interpolate.interp1d(np.linspace(z_min, z_max, samples), np.gradient(calc_c(np.linspace(z_min, z_max, samples))), kind='quadratic')
+# SOUND VELOCITY
+calc_c = lambda z: sound_velocity_medwin(S, calc_T(z), z)
 
+
+# SOUND VELOCITY VERTICAL GRADIENT
+z = np.linspace(-10000, 0, 10000)
+calc_dz_c = interpolate.interp1d(z, np.gradient(calc_c(z)), kind='quadratic')
