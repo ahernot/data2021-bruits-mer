@@ -159,18 +159,20 @@ class Propagation2D:
                     reflection_coef_dB = 10 * np.log10(event[1])
 
 
-    def gen_filter (self, x, fmin, fmax, nsamples):
+    def __call__ (self, x):
         """
         :param x: Distance from source (in m)
-        :param fmin: Min frequency
-        :param fmax: Max frequency
-        :param nsamples: Number of samples
         """
+        # z = self.Z_func(x)
+        # absorption_dB = calc_absorption(freqs, z, calc_T(z), calc_S(z), calc_pH(z))
 
-        f = np.linspace(fmin, fmax, nsamples)
-        z = self.Z_func(x)
+        x_id = np.argmin(np.abs(self.X - x))
+        absorption_dB = [self.A[f][x_id] for f in self.A.keys()]
+        return interpolate.interp1d(list(self.A.keys()), absorption_dB, kind='linear')
 
-        absorption_dB = calc_absorption(f, z, calc_T(z), calc_S(z), calc_pH(z))
+
+
+        
 
 
 
@@ -181,6 +183,4 @@ class Propagation2D:
 
 """
 ground reflection coefficient!!!!!!!!!!!!!!
-
 """
-
