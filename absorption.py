@@ -19,7 +19,7 @@ def calc_absorption (f: float, z: float, T: float, S: float, pH: float):
     """
     
     #print(f)
-    # f = f / 1000
+    f /= 1000
 
     # Boric acid (relaxation absorption)
     f1 = 0.78 * np.sqrt(S / 35) * np.exp(T / 26)  # Boric acid relaxation frequency (kHz)
