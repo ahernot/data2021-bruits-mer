@@ -53,6 +53,7 @@ class Propagation2D:
         # Run path simulation
         self.__generate()
         self.A = dict()
+        self.f = list()
     
 
     def __init_limit_bottom (self, limit_bottom):
@@ -105,7 +106,8 @@ class Propagation2D:
                 x_new = float(self.func_solve(lambda x1: self.limit_bottom_func(x) - dx_z * (x1 - x) - z, x0=x))
                 z_new = self.limit_bottom_func(x_new)
                 # Calculate reflection direction
-                dx_z_ground = self.calc_der(self.limit_bottom_func, x_new, dx=x_new-x)  # dx_z_ground = (z_new - limit_bottom_func(z)) / (x_new - x)
+                dx_der = dx if np.abs(x_new - x) <= 1e-6 else x_new - x
+                dx_z_ground = self.calc_der(self.limit_bottom_func, x_new, dx=dx_der)  # dx_z_ground = (z_new - self.limit_bottom_func(x)) / dx_der
                 alpha_new = np.pi - np.arctan(dx_z) - 2 * np.arctan(dx_z_ground)
                 dx_z = np.tan(alpha_new)
                 # Add reflection event
@@ -143,6 +145,9 @@ class Propagation2D:
     def run (self, *freqs: float or int):
 
         for f in freqs:
+            if f in self.f: continue  # already generated
+            
+            self.f.append(f)
             self.A[f] = np.array([0., ])
 
             reflection_coef_dB = 0.
@@ -151,7 +156,7 @@ class Propagation2D:
                 if event[0] == Propagation2D.__event_propagation:
                     z, dl = event[1][:, 0], event[1][:, 1]
                     absorption_dB = np.multiply(calc_absorption(f, z, calc_T(z), calc_S(z), calc_pH(z)), dl)
-                    absorption_dB_cum = reflection_coef_dB + self.A[f][-1] + np.cumsum(absorption_dB)
+                    absorption_dB_cum = (-1 * reflection_coef_dB) + self.A[f][-1] + np.cumsum(absorption_dB)
                     self.A[f] = np.concatenate((self.A[f], absorption_dB_cum), axis=0)
                     absorption_dB_cum = 0.
 
